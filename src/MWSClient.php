@@ -1172,8 +1172,6 @@ class MWSClient
         foreach ($MWSProduct as $product) {
             $csv->insertOne(array_values($product->toArray()));
         }
-//        $csv->output(date('Y-m-d') . '.csv');
-//        die;
 
         return $this->SubmitFeed('_POST_FLAT_FILE_LISTINGS_DATA_', $csv);
     }

@@ -259,7 +259,6 @@ class AmazonMarketPlaceProduct
     {
         /*'feed_product_type' => 'television',*/
         return array_merge(
-            $this->other_attributes,
             [
                 'feed_product_type' => $this->feed_product_type,
                 'item_sku' => $this->sku,
@@ -299,7 +298,8 @@ class AmazonMarketPlaceProduct
                 'bullet_point3' => array_key_exists(2, $this->bullet_point) ? $this->bullet_point[2] : '',
                 'bullet_point4' => array_key_exists(3, $this->bullet_point) ? $this->bullet_point[3] : '',
                 'bullet_point5' => array_key_exists(4, $this->bullet_point) ? $this->bullet_point[4] : '',
-            ]
+            ],
+            $this->other_attributes
         );
     }
 
