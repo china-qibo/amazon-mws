@@ -36,7 +36,6 @@ class MWSClient
         'APJ6JRA9NG5V4' => 'mws-eu.amazonservices.com',
         'A1F83G8C2ARO7P' => 'mws-eu.amazonservices.com',
         'A1VC38T7YXB528' => 'mws.amazonservices.jp',
-        'AAHKV2X7AFYLW' => 'mws.amazonservices.com.cn',
         'A39IBJ37TRP1C6' => 'mws.amazonservices.com.au',
         'A2Q3Y263D00KWC' => 'mws.amazonservices.com',
         'A1805IZSGTT6HS' => 'mws-eu.amazonservices.com',
@@ -44,7 +43,8 @@ class MWSClient
         'A17E79C6D8DWNP' => 'mws.amazonservices.com',
         'A33AVAJ2PDY3EV' => 'mws.amazonservices.com',
         'A19VAU5U5O7RUS' => 'mws-fe.amazonservices.com',
-        'A2VIGQ35RCS4UG' => 'mws.amazonservices.ae'
+        'A2VIGQ35RCS4UG' => 'mws.amazonservices.ae',
+        'A2NODRKZP88ZB9' => 'mws-eu.amazonservices.com',
     ];
     protected $debugNextFeed = false;
     protected $client = null;
@@ -1431,7 +1431,7 @@ class MWSClient
             ];
             if ($endPoint['action'] === 'SubmitFeed') {
                 $headers['Content-MD5'] = base64_encode(md5($body, true));
-                if (in_array($this->config['Marketplace_Id'], ['AAHKV2X7AFYLW', 'A1VC38T7YXB528'])) {
+                if (in_array($this->config['Marketplace_Id'], ['A1VC38T7YXB528'])) {
                     $headers['Content-Type'] = 'text/xml; charset=UTF-8';
                 } else {
                     $headers['Content-Type'] = 'text/xml; charset=iso-8859-16';
