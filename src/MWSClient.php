@@ -367,7 +367,8 @@ class MWSClient
         ],
         $FulfillmentChannels = 'MFN',
         DateTime $till = null
-    ) {
+    )
+    {
         $query = [
             'CreatedAfter' => gmdate(self::DATE_FORMAT, $from->getTimestamp())
         ];
@@ -868,6 +869,69 @@ class MWSClient
         return $this->SubmitFeed('_POST_PRODUCT_PRICING_DATA_', $feed);
     }
 
+    /**
+     * Update a product's images
+     *
+     * @param array $array array containing arrays with next keys: [sku, image_type, image_location]
+     * @return array|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function updateImages(array $array)
+    {
+        $feed = [
+            'MessageType' => 'ProductImage',
+            'Message' => []
+        ];
+        foreach ($array as $item) {
+            $feed['Message'][] = [
+                'MessageID' => rand(),
+                'OperationType' => 'Update',
+                'ProductImage' => [
+                    'SKU' => $item['sku'],
+                    'ImageType' => $item['image_type'],
+                    'ImageLocation' => $item['image_location']
+                ]
+            ];
+        }
+        return $this->SubmitFeed('_POST_PRODUCT_IMAGE_DATA_', $feed);
+    }
+
+    /**
+     * Update a product's Relationship
+     *
+     * @param array $array array containing arrays with next keys: [parent_sku, relation_list]
+     * @return array|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function updateRelationship(array $array)
+    {
+        $feed = [
+            'MessageType' => 'Relationship',
+            'Message' => []
+        ];
+        foreach ($array as $item) {
+            $relationList = $item['relation_list'];
+            $newData = [
+                'MessageID' => rand(),
+                'OperationType' => 'Update',
+                'Relationship' => [
+                    'ParentSKU' => $item['parent_sku'],
+                    'Relation' => [],
+                ]
+            ];
+
+            foreach ($relationList as $relation) {
+                $newData['Relationship']['Relation'][] = [
+                    'SKU' => $relation['sku'],
+                    'Type' => $relation['type'] ?? 'Variation',
+                ];
+            }
+
+            $feed['Message'][] = $newData;
+        }
+
+        return $this->SubmitFeed('_POST_PRODUCT_RELATIONSHIP_DATA_', $feed);
+    }
 
     /**
      * Returns the feed processing report and the Content-MD5 header.
