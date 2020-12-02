@@ -870,13 +870,13 @@ class MWSClient
     }
 
     /**
-     * Update a product's images
+     * Update a product's image
      *
      * @param array $array array containing arrays with next keys: [sku, image_type, image_location]
      * @return array|string
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function updateImages(array $array)
+    public function updateImage(array $array)
     {
         $feed = [
             'MessageType' => 'ProductImage',
@@ -1158,7 +1158,7 @@ class MWSClient
     }
 
     /**
-     * Sets the shipping status of an order
+     * Sets the shipping status of orders
      * @param array $data required data
      * @return array feed submission result
      * @throws Exception
@@ -1166,45 +1166,49 @@ class MWSClient
      */
     public function setDeliveryState(array $data)
     {
-        if (!isset($data["shippingDate"])) {
-            $data["shippingDate"] = date("c");
-        }
-
-        if (!isset($data["carrierCode"]) && !isset($data["carrierName"])) {
-            throw new Exception('Missing required carrier data');
-        }
-
         $feed = [
             'MessageType' => 'OrderFulfillment',
-            'Message' => [
+            'Message' => []
+        ];
+        foreach ($data as $k => $datum) {
+            if (!isset($datum["shippingDate"])) {
+                $datum["shippingDate"] = date("c");
+            }
+
+            if (!isset($datum["carrierCode"]) && !isset($datum["carrierName"])) {
+                throw new Exception('Missing required carrier data');
+            }
+
+            $feed['Message'][$k] = [
                 'MessageID' => rand(),
                 "OrderFulfillment" => [
-                    "AmazonOrderID" => $data["orderId"],
-                    "FulfillmentDate" => $data["shippingDate"]
+                    "AmazonOrderID" => $datum["orderId"],
+                    "FulfillmentDate" => $datum["shippingDate"]
                 ]
-            ]
-        ];
-        $fulfillmentData = [];
+            ];
+            $fulfillmentData = [];
 
 
-        if (isset($data["carrierCode"])) {
-            $fulfillmentData["CarrierCode"] = $data["carrierCode"];
-        } elseif (isset($data["carrierName"])) {
-            $fulfillmentData["CarrierName"] = $data["carrierName"];
+            if (isset($datum["carrierCode"])) {
+                $fulfillmentData["CarrierCode"] = $datum["carrierCode"];
+            } elseif (isset($datum["carrierName"])) {
+                $fulfillmentData["CarrierName"] = $datum["carrierName"];
+            }
+
+            if (isset($datum["shippingMethod"])) {
+                $fulfillmentData["ShippingMethod"] = $datum["shippingMethod"];
+            }
+
+
+            if (isset($datum["trackingCode"])) {
+                $fulfillmentData["ShipperTrackingNumber"] = $datum["trackingCode"];
+            }
+
+            if (sizeof($fulfillmentData) > 0) {
+                $feed["Message"][$k]["OrderFulfillment"]["FulfillmentData"] = $fulfillmentData;
+            }
         }
 
-        if (isset($data["shippingMethod"])) {
-            $fulfillmentData["ShippingMethod"] = $data["shippingMethod"];
-        }
-
-
-        if (isset($data["trackingCode"])) {
-            $fulfillmentData["ShipperTrackingNumber"] = $data["trackingCode"];
-        }
-
-        if (sizeof($fulfillmentData) > 0) {
-            $feed["Message"]["OrderFulfillment"]["FulfillmentData"] = $fulfillmentData;
-        }
         $feed = $this->SubmitFeed('_POST_ORDER_FULFILLMENT_DATA_', $feed);
 
         return $feed;
